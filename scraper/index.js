@@ -1,12 +1,13 @@
 const axios = require('axios');
 const { Configuration, OpenAI } = require('openai');
 const { MongoClient } = require('mongodb');
+require('dotenv').config();
 
 // OpenAI-Konfiguration
-const openai = new OpenAI({ apiKey: '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' });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // MongoDB-Verbindung
-const mongoUri = "mongodb+srv://doadmin:Eo0TM2F1Xn53986w@db-mongodb-fra1-86848-6f6f1540.mongo.ondigitalocean.com/admin?tls=true&authSource=admin&replicaSet=db-mongodb-fra1-86848";
+const mongoUri =  process.env.MONGODB_URI;
 const client = new MongoClient(mongoUri);
 
 const weightFactor = 0.9;
