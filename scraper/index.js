@@ -2,6 +2,7 @@ const axios = require('axios');
 const { Configuration, OpenAI } = require('openai');
 const { MongoClient } = require('mongodb');
 require('dotenv').config();
+var cron = require('node-cron');
 
 // OpenAI-Konfiguration
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -107,5 +108,8 @@ async function main() {
     await client.close();
   }
 }
+cron.schedule('*/5 * * * *', () => {
+  main();
+});
 
-main();
+// main();
