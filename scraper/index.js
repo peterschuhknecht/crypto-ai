@@ -36,6 +36,7 @@ async function main() {
     const response = await axios.get(url);
 
     if (response.status === 200) {
+      console.log('-----------------------');
       const data = response.data;
       let itemCount = 0;
       let sentimentCount = 0;
@@ -43,8 +44,8 @@ async function main() {
       const sentimentOpenaiWeighted = [];
 
       for (const item of data.data) {
-        console.log('Titel:', item.title);
-        console.log('Sentiment API:', getSentiment(item.sentiment));
+        // console.log('Titel:', item.title);
+        // console.log('Sentiment API:', getSentiment(item.sentiment));
 
         // Anfrage an die OpenAI-Chat-Completion-API
         const completion = await openai.chat.completions.create({
@@ -62,11 +63,11 @@ async function main() {
           ]
         });
 
-        console.log('OpenAI Response:', completion.choices[0].message.content);
+        // console.log('OpenAI Response:', completion.choices[0].message.content);
 
         // Extrahiere und parse den Rückgabewert
         const sentimentValue = parseFloat(completion.choices[0].message.content);
-        console.log('Sentiment OpenAi:', sentimentValue);
+        // console.log('Sentiment OpenAi:', sentimentValue);
 
         // Werte in Arrays speichern
         sentimentOpenai.push(sentimentValue);
@@ -78,7 +79,7 @@ async function main() {
         sentimentCount += getSentiment(item.sentiment);
         numberOfArticles = parseInt(numberOfArticles * weightFactor);
 
-        console.log('-----------------------');
+        // console.log('-----------------------');
       }
 
       console.log('Anzahl der Artikel:', itemCount);
@@ -98,7 +99,7 @@ async function main() {
       };
 
       const result = await collection.insertOne(document);
-      console.log("Gespeicherte Objekt-ID:", result.insertedId);
+      // console.log("Gespeicherte Objekt-ID:", result.insertedId);
     } else {
       console.log("Fehler bei der API-Anfrage:", response.status);
     }
@@ -108,8 +109,8 @@ async function main() {
     await client.close();
   }
 }
-cron.schedule('*/5 * * * *', () => {
-  main();
-});
+// cron.schedule('* * * * *', () => {
+//   main();
+// });
 
-// main();
+main();
