@@ -1,27 +1,19 @@
+
 const getSentiment = require('./func/helper');
 
 const axios = require('axios');
-const { Configuration, OpenAI } = require('openai');
-const { MongoClient } = require('mongodb');
+const { OpenAI } = require('openai');
 require('dotenv').config();
-var cron = require('node-cron');
 
 // OpenAI-Konfiguration
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// MongoDB-Verbindung
-const mongoUri =  process.env.MONGODB_URI;
-const client = new MongoClient(mongoUri);
 
 async function main() {
-
-  client.connect();
-  const db = client.db('ai');
-  const collection = db.collection('news');
   try {
 
     const weightFactor = 0.9;
-    let numberOfArticles = 20;
+    let numberOfArticles = 5;
 
     // API-URL zusammenbauen
     const url = `https://cryptonews-api.com/api/v1?tickers=BTC&items=${numberOfArticles}&page=1&token=8vmlj0xmy1gemrpkbmufwtij1bp4sg2u5jdrmtag`;
@@ -56,8 +48,6 @@ async function main() {
           ]
         });
 
-        // console.log('OpenAI Response:', completion.choices[0].message.content);
-
         // Extrahiere und parse den Rückgabewert
         const sentimentValue = parseFloat(completion.choices[0].message.content);
         // console.log('Sentiment OpenAi:', sentimentValue);
@@ -73,6 +63,7 @@ async function main() {
         numberOfArticles = parseInt(numberOfArticles * weightFactor);
 
         // console.log('-----------------------');
+        // console.log('Response:', completion);
       }
 
       console.log('Anzahl der Artikel:', itemCount);
@@ -83,28 +74,12 @@ async function main() {
       console.log('Sentiment OpenAi Weighted Durchschnitt:', Math.round(sentimentOpenaiWeightedAvg * 100) / 100);
       console.log('Zeit:', new Date());
 
-      // Daten in der Datenbank speichern
-      const document = {
-        ticker: "BTC",
-        dateTime: new Date().toISOString(),
-        sentimentApi: sentimentCount / itemCount,
-        sentimentOpenai: Math.round(sentimentOpenaiAvg * 100) / 100,
-        sentimentOpenaiWeighted: Math.round(sentimentOpenaiWeightedAvg * 100) / 100
-      };
-
-      await collection.insertOne(document);
-      // console.log("Gespeicherte Objekt-ID:", result.insertedId);
     } else {
       console.log("Fehler bei der API-Anfrage:", response.status);
     }
   } catch (error) {
     console.error("Fehler:", error);
-  } finally {
-    await client.close();
   }
 }
-cron.schedule('*/5 * * * *', () => {
-  main();
-});
 
 main();
