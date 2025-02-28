@@ -5,6 +5,14 @@ const axios = require('axios');
 const { OpenAI } = require('openai');
 require('dotenv').config();
 
+const { Logtail } = require("@logtail/node");
+const logtail = new Logtail("gdCQXT2buN99u9m2DQD5t8aP", {
+  endpoint: 'https://s1220222.eu-nbg-2.betterstackdata.com',
+});
+
+// Ensure that all logs are sent to Logtail
+logtail.flush()
+
 // OpenAI-Konfiguration
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -20,7 +28,7 @@ async function main() {
     const response = await axios.get(url);
 
     if (response.status === 200) {
-      console.log('-----------------------');
+      // console.log('-----------------------');
       const data = response.data;
       let itemCount = 0;
       let sentimentCount = 0;
@@ -66,19 +74,40 @@ async function main() {
         // console.log('Response:', completion);
       }
 
-      console.log('Anzahl der Artikel:', itemCount);
-      console.log('Sentiment API Durchschnitt:', sentimentCount / itemCount);
+
+      // console.log('Anzahl der Artikel:', itemCount);
+      // console.log('Sentiment API Durchschnitt:', sentimentCount / itemCount);
       const sentimentOpenaiAvg = sentimentOpenai.reduce((a, b) => a + b, 0) / sentimentOpenai.length;
-      console.log('Sentiment OpenAi Durchschnitt:', Math.round(sentimentOpenaiAvg * 100) / 100);
+      // console.log('Sentiment OpenAi Durchschnitt:', Math.round(sentimentOpenaiAvg * 100) / 100);
       const sentimentOpenaiWeightedAvg = sentimentOpenaiWeighted.reduce((a, b) => a + b, 0) / sentimentOpenaiWeighted.length;
-      console.log('Sentiment OpenAi Weighted Durchschnitt:', Math.round(sentimentOpenaiWeightedAvg * 100) / 100);
-      console.log('Zeit:', new Date());
+      // console.log('Sentiment OpenAi Weighted Durchschnitt:', Math.round(sentimentOpenaiWeightedAvg * 100) / 100);
+      // console.log('Zeit:', new Date());
+
+      logtail.info("Scraping durchgeführt", {
+          additional_info: {
+              'Anzahl der Artikel': itemCount,
+              'Sentiment API Durchschnitt:' : sentimentCount / itemCount,
+              'Sentiment OpenAi Durchschnitt': Math.round(sentimentOpenaiAvg * 100) / 100,
+              'Sentiment OpenAi Weighted Durchschnitt': Math.round(sentimentOpenaiWeightedAvg * 100) / 100,
+              'Zeit': new Date()
+          }
+      });
 
     } else {
-      console.log("Fehler bei der API-Anfrage:", response.status);
+      logtail.info("Fehler bei der API-Anfrage", {
+        additional_info: {
+            'Status': response.status
+        }
+      });
+      // console.log("Fehler bei der API-Anfrage:", response.status);
     }
   } catch (error) {
-    console.error("Fehler:", error);
+    logtail.info("Fehler", {
+      additional_info: {
+        'error': error
+      }
+    });
+    // console.error("Fehler:", error);
   }
 }
 
