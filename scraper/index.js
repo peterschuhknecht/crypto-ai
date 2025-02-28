@@ -89,6 +89,7 @@ async function main() {
       console.log('Sentiment OpenAi Durchschnitt:', Math.round(sentimentOpenaiAvg * 100) / 100);
       const sentimentOpenaiWeightedAvg = sentimentOpenaiWeighted.reduce((a, b) => a + b, 0) / sentimentOpenaiWeighted.length;
       console.log('Sentiment OpenAi Weighted Durchschnitt:', Math.round(sentimentOpenaiWeightedAvg * 100) / 100);
+      console.log('Zeit:', new Date());
 
       // Daten in der Datenbank speichern
       const document = {
