@@ -111,7 +111,7 @@ async function main() {
     await client.close();
   }
 }
-cron.schedule('*/15 * * * *', () => {
+cron.schedule('*/5 * * * *', () => {
   main();
 });
 
