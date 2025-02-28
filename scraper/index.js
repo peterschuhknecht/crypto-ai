@@ -10,9 +10,6 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 // MongoDB-Verbindung
 const mongoUri =  process.env.MONGODB_URI;
 const client = new MongoClient(mongoUri);
-client.connect();
-const db = client.db('ai');
-const collection = db.collection('news');
 
 // Hilfsfunktion, um den API-Sentimentwert in eine Zahl umzuwandeln
 function getSentiment(x) {
@@ -26,10 +23,14 @@ function getSentiment(x) {
 }
 
 async function main() {
+
+  client.connect();
+  const db = client.db('ai');
+  const collection = db.collection('news');
   try {
 
     const weightFactor = 0.9;
-    let numberOfArticles = 10;
+    let numberOfArticles = 20;
 
     // API-URL zusammenbauen
     const url = `https://cryptonews-api.com/api/v1?tickers=BTC&items=${numberOfArticles}&page=1&token=8vmlj0xmy1gemrpkbmufwtij1bp4sg2u5jdrmtag`;
@@ -98,7 +99,7 @@ async function main() {
         sentimentOpenaiWeighted: Math.round(sentimentOpenaiWeightedAvg * 100) / 100
       };
 
-      // await collection.insertOne(document);
+      await collection.insertOne(document);
       // console.log("Gespeicherte Objekt-ID:", result.insertedId);
     } else {
       console.log("Fehler bei der API-Anfrage:", response.status);
@@ -109,7 +110,7 @@ async function main() {
     await client.close();
   }
 }
-cron.schedule('*/5 * * * *', () => {
+cron.schedule('*/15 * * * *', () => {
   main();
 });
 
